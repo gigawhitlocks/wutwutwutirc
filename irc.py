@@ -5,6 +5,7 @@ import sys
 class ChatBridge(irc.IRCClient):
 
     nickname = "skeetersbot"
+    debug = False
     
     def connectionMade(self):
         irc.IRCClient.connectionMade(self)
@@ -17,8 +18,6 @@ class ChatBridge(irc.IRCClient):
 
     def signedOn(self):
         self.join(self.factory.channel)
-        self.userlist()
-
 
     def privmsg(self, user, channel, mesg):
         print(user.split("!")[0]+": "+mesg)
@@ -33,14 +32,14 @@ class ChatBridge(irc.IRCClient):
         self.sendLine('NAMES %s' % self.factory.channel)
     
     def irc_RPL_NAMREPLY(self, *nargs):
-        print('NAMES: ', nargs)
-
+        print( nargs[1][3:] )
     def irc_RPL_ENDOFNAMES(self, *nargs):
         print("NAMES COMPLETE")
 
     def irc_unknown(self, prefix, command, params):
         "Print all unhandled replies, for debugging."
-        print ('UNKNOWN:', prefix, command, params)
+        if self.debug :
+            print ('UNKNOWN:', prefix, command, params)
 
 
 class ChatBridgeFactory(protocol.ClientFactory):
