@@ -1,0 +1,3 @@
+#Soon...
+
+A web frontend for IRC. Must be run as a service, since there's no way to connect directly to an IRC server from the browser.
