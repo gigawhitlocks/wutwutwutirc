@@ -1,12 +1,13 @@
 from twisted.words.protocols import irc
+
 from twisted.internet import reactor, protocol
-import sys
+
 
 class ChatBridge(irc.IRCClient):
 
     nickname = "skeetersbot"
     debug = False
-    
+
     def connectionMade(self):
         irc.IRCClient.connectionMade(self)
 
@@ -33,6 +34,7 @@ class ChatBridge(irc.IRCClient):
     
     def irc_RPL_NAMREPLY(self, *nargs):
         print( nargs[1][3:] )
+
     def irc_RPL_ENDOFNAMES(self, *nargs):
         print("NAMES COMPLETE")
 
@@ -50,6 +52,8 @@ class ChatBridgeFactory(protocol.ClientFactory):
     def buildProtocol(self, addr):
         p = ChatBridge()
         p.factory = self
+        self.say = p.say
+
         return p
 
     def clientConnectionLost(self, connector, reason):
@@ -60,9 +64,3 @@ class ChatBridgeFactory(protocol.ClientFactory):
         print( "connection failed:", reason)
         reactor.stop()
 
-
-if __name__ == "__main__":
-    f = ChatBridgeFactory(sys.argv[3])
-    reactor.connectTCP(sys.argv[1], int(sys.argv[2]), f)
-
-    reactor.run()
