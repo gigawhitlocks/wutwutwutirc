@@ -44,6 +44,22 @@ var sendchat = (function() {
 														.message + "<br />");
 					break;
 
+        case "notice":
+          $("chatbox")
+            .append("<strong><span style=\"color: red;\">"+message.message+"<br />");
+          break;
+
+        case "PMoutbound":
+          $("chatbox")
+            .append("&gt;"+message.user+"&lt; "+message.message+"<br />");
+          break;
+
+        case "PMinbound":
+          $("chatbox")
+            .append("&lt;"+message.user+"&gt; "+message.message+"<br />");
+          break;
+
+
 				default:
 					console.log("Malformed message from server \""+message+"\"");
 			}

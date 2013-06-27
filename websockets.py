@@ -39,7 +39,7 @@ class ChatSocket(websocket.WebSocketHandler):
         self.irc_conn = self.factory.bridge
         self.commands = {"kick":self.irc_conn.kick,
                     "nick":self.irc_conn.setNick,
-                    "msg":self.irc_conn.privmsg}
+                    "msg":self.irc_conn.msg}
 
     def open(self):
         self.factory = ChatBridgeFactory("#skeetertoolingaround")
@@ -52,8 +52,18 @@ class ChatSocket(websocket.WebSocketHandler):
             self.write_message({"type":"chat", "user":self.factory.nickname, "message":message})
         else:
             message = message.split(" ") # split into command and args
-            message[0] = message[0][1:] # strip /
-            self.commands[message[0]](message[1].encode('ascii','ignore'))
+            if len(message[0]) > 1:
+                message[0] = message[0][1:] # strip /
+            else:
+                return
+
+            if message[0] in self.commands:
+                command = self.commands[message[0]]
+                message.remove(message[0])
+                args = [arg.encode('ascii','ignore') for arg in message]
+                command(*args)
+                print(command)
+                print(args)
 
     def on_close(self):
         pass
