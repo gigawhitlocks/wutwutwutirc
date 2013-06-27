@@ -34,14 +34,19 @@ class ViewHandler(tornado.web.RequestHandler):
         self.render("view.html")
 
 class ChatSocket(websocket.WebSocketHandler):
-    irc_conn = ChatBridgeFactory("#NoRahjaAllowed")
+
+    def connectToIRC(self):
+        self.irc_conn = self.factory.bridge
 
     def open(self):
-        returnvalue = reactor.connectTCP("irc.dhirc.com",6667,self.irc_conn)
-        print(returnvalue)
+        self.factory = ChatBridgeFactory("#skeetertoolingaround")
+        reactor.connectTCP("irc.dhirc.com",6667,self.factory)
+        self.factory.websocket = self
 
     def on_message(self, message):
-        self.irc_conn.say("#NoRahjaAllowed",message.encode('ascii','ignore'))
+        if message[0] != "/":
+            self.irc_conn.say(self.factory.channel,message.encode('ascii','ignore'))
+        self.write_message({"type":"chat", "user":"you", "message":message})
 
     def on_close(self):
         pass

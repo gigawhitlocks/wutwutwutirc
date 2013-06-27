@@ -7,9 +7,14 @@ class ChatBridge(irc.IRCClient):
 
     nickname = "skeetersbot"
     debug = False
+    websocket = None
 
     def connectionMade(self):
         irc.IRCClient.connectionMade(self)
+        self.factory.websocket.connectToIRC()
+        self.factory.websocket.write_message({"type":"chat",\
+                "user":"NOTICE",\
+                "message":"YOU HAVE JOINED "+self.factory.channel})
 
     def connectionLost(self, reason):
         irc.IRCClient.connectionLost(self, reason)
@@ -21,7 +26,12 @@ class ChatBridge(irc.IRCClient):
         self.join(self.factory.channel)
 
     def privmsg(self, user, channel, mesg):
-        print(user.split("!")[0]+": "+mesg)
+        if self.factory.websocket :
+            self.factory.websocket.write_message({"type":"chat",\
+                    "user":user.split("!")[0],
+                    "message":mesg})
+        else :
+            print ("websocket not open")
 
     def action(self, user, channel, mesg):
         pass
@@ -45,6 +55,8 @@ class ChatBridge(irc.IRCClient):
 
 
 class ChatBridgeFactory(protocol.ClientFactory):
+
+    bridge = None
     
     def __init__(self, channel):
         self.channel = channel
@@ -52,7 +64,7 @@ class ChatBridgeFactory(protocol.ClientFactory):
     def buildProtocol(self, addr):
         p = ChatBridge()
         p.factory = self
-        self.say = p.say
+        self.bridge = p
 
         return p
 
