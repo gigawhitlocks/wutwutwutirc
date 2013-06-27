@@ -21,6 +21,10 @@ class ChatBridge(irc.IRCClient):
 
     def joined(self, channel):
         pass
+    
+    def setNick(self, nickname):
+        irc.IRCClient.setNick(self,nickname)
+        self.factory.nickname = nickname
 
     def signedOn(self):
         self.join(self.factory.channel)
@@ -65,6 +69,7 @@ class ChatBridgeFactory(protocol.ClientFactory):
         p = ChatBridge()
         p.factory = self
         self.bridge = p
+        self.nickname = p.nickname
 
         return p
 
